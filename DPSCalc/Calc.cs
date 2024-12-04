@@ -1,8 +1,9 @@
 ﻿using MelonLoader;
 using HarmonyLib;
 using System.Timers;
+using System.Linq.Expressions;
 
-[assembly: MelonInfo(typeof(DPSCalc.Calc), "DPSCalc", "1.0.5", "Faelynox", null)]
+[assembly: MelonInfo(typeof(DPSCalc.Calc), "DPSCalc", "1.1.0", "Faelynox", null)]
 [assembly: MelonGame("KisSoft", "ATLYSS")]
 
 namespace DPSCalc
@@ -14,7 +15,6 @@ namespace DPSCalc
         public static List <int> damageList = [];
         public static List <int> dpsList = [];
         public static List <int> dpsList2 = [];
-        public static List <int> compList = [];
         public static int finalDPS;
         private System.Timers.Timer timer;
         public override void OnInitializeMelon()
@@ -25,43 +25,74 @@ namespace DPSCalc
             timer = new System.Timers.Timer(1000);
             timer.Elapsed += onTimerElapsed;
             timer.AutoReset = true;
-            timer.Start();
-        }
-        public void onTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            if (dpsList.Count() > 0)
+            if (timer == null)
             {
-                int avgdps = dpsList.Sum();
-                dpsList2.Add(avgdps);
-
-                if (dpsList2.Count() > 5 || compList.Count() > 5)
-                {
-                    dpsList2.RemoveAt(0);
-                    compList.RemoveAt(0);
-                }
-                
-                if (!compList.Contains(avgdps))
-                {
-                    compList.Add(avgdps);
-                }
-
-                if (!dpsList2.SequenceEqual(compList))
-                {
-                    MelonLogger.Msg($"[DEBUG] Something went wrong.. clearing both lists!");
-                    dpsList2.Clear();
-                    compList.Clear();
-                }
-                
-                MelonLogger.Msg($"[DPS] Current DPS: {dpsList2.Average()}");
-                dpsList.Clear();
+                MelonLogger.Error("[ERROR] Timer is null!");
             }
             else
             {
-                dpsList2.RemoveAt(0);
-                compList.RemoveAt(0);
+                timer.Start();
+                MelonLogger.Msg("[DEBUG] Timer started!");
+            }
+
+
+        }
+        public void onTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (dpsList.Count > 0)
+            {
+                try
+                {
+                    int maxValue = 0;
+                    double averageDPSoverTime;
+
+                    void clearLists()
+                    {
+                        dpsList2.Clear();
+                    }
+                    void removeMaximum()
+                    {
+                        if (maxValue != 0)
+                        {
+                            dpsList2.Remove(maxValue);
+                        }
+                    }
+
+
+                    int avgdps = dpsList.Sum();
+                    dpsList2.Add(avgdps);
+                    averageDPSoverTime = dpsList2.Average();
+
+                    if (dpsList2.Count() > 10 || dpsList.Count() == 0)
+                    {
+                        removeMaximum();
+                    }
+
+                    if (dpsList2.Count() > 0)
+                    {
+                        MelonLogger.Msg($"""
+
+                                        [DPS] Average DPS: {averageDPSoverTime}
+                                        [DPS] Raw DPS: {dpsList.Sum()}
+                                        """);
+                    }
+
+                    dpsList.Clear();
+                    if (dpsList2.Count > 0)
+                    {
+                        maxValue = dpsList2.Max();
+                    }
+                }
+                catch (Exception exp)
+                {
+                    MelonLogger.Error($"[ERROR] {exp}");
+                }
+            }
+            else
+            {
+                return;
             }
         }
-
 
         [HarmonyPatch(typeof(CombatCollider), "Apply_Damage")]
         public class ApplyDamagePatch
