@@ -29,25 +29,43 @@ namespace DPSCalc
         }
         public void onTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
+            MelonLogger.Msg($"""
+                            
+                            [DEBUG] Timer elapsed!
+                            [DEBUG] {String.Join(",", dpsList2)}
+                            [DEBUG] {String.Join(",", compList)} 
+                            """);
             if (dpsList.Count() > 0)
             {
                 int avgdps = dpsList.Sum();
                 dpsList2.Add(avgdps);
-                if (dpsList2.Count() > 5)
-                {
-                    dpsList.RemoveAt(0);
-                }
-                if (dpsList2 == compList)
+
+                if (dpsList2.Count() > 5 || compList.Count() > 5)
                 {
                     dpsList2.RemoveAt(0);
                     compList.RemoveAt(0);
                 }
-                else
+                
+                if (!compList.Contains(avgdps))
                 {
-                    compList.Add(dpsList2[0]);
+                    compList.Add(avgdps);
                 }
+
+                if (!dpsList2.SequenceEqual(compList))
+                {
+                    MelonLogger.Msg($"[DEBUG] Something went wrong.. clearing both lists!");
+                    dpsList2.Clear();
+                    compList.Clear();
+                }
+                
                 MelonLogger.Msg($"[DPS] Current DPS: {dpsList2.Average()}");
+                MelonLogger.Msg($"[DEBUG] {String.Join(",", dpsList2)} {String.Join(",", compList)}");
                 dpsList.Clear();
+            }
+            else
+            {
+                dpsList2.RemoveAt(0);
+                compList.RemoveAt(0);
             }
         }
 
