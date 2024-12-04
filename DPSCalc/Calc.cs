@@ -2,7 +2,7 @@
 using HarmonyLib;
 using System.Timers;
 
-[assembly: MelonInfo(typeof(DPSCalc.Calc), "DPSCalc", "1.0.0", "Faelynox", null)]
+[assembly: MelonInfo(typeof(DPSCalc.Calc), "DPSCalc", "1.0.5", "Faelynox", null)]
 [assembly: MelonGame("KisSoft", "ATLYSS")]
 
 namespace DPSCalc
