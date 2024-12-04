@@ -29,12 +29,6 @@ namespace DPSCalc
         }
         public void onTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            MelonLogger.Msg($"""
-                            
-                            [DEBUG] Timer elapsed!
-                            [DEBUG] {String.Join(",", dpsList2)}
-                            [DEBUG] {String.Join(",", compList)} 
-                            """);
             if (dpsList.Count() > 0)
             {
                 int avgdps = dpsList.Sum();
@@ -59,7 +53,6 @@ namespace DPSCalc
                 }
                 
                 MelonLogger.Msg($"[DPS] Current DPS: {dpsList2.Average()}");
-                MelonLogger.Msg($"[DEBUG] {String.Join(",", dpsList2)} {String.Join(",", compList)}");
                 dpsList.Clear();
             }
             else
